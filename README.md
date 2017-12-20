@@ -14,6 +14,11 @@ pip install pymongo
 pip install websockets
 ```
 
+#influxDB client
+```bash
+pip install influxdb
+```
+
 # MQTT broquer
 ```bash
 sudo apt-get install Mosquitto

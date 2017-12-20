@@ -11,10 +11,14 @@
     "mongodb":{
         "uri":"mongodb://10.0.0.44:27017/",
         "db":"HSM_db_Proxy",
+        "logfile":"/home/pi/share/mongo_client.log",
         "enable":true
     },
-    "redis":{
-        "uri":"",
+    "influxdb":{
+        "host":"10.0.0.17",
+        "port":8086,
+        "db":"meshNodes",
+        "logfile":"/home/pi/share/influx_client.log",
         "enable":false
     }
 }
