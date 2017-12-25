@@ -1,5 +1,6 @@
 import paho.mqtt.client as mqtt
 from influxdb import InfluxDBClient
+import requests
 import datetime
 import logging as log
 import cfg
@@ -26,8 +27,11 @@ def on_message(client, userdata, msg):
                     }
                 }
             ]
+        try:
             clientDB.write_points(post)
-            log.debug(msg.topic+" "+str(msg.payload)+" posted")
+        except requests.exceptions.ConnectionError:
+            log.error("ConnectionError sample skipped"+msg.topic)
+        log.debug(msg.topic+" "+str(msg.payload)+" posted")
     except ValueError:
         log.error(" ValueError with : "+msg.topic+" "+str(msg.payload))
 
