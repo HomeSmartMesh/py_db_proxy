@@ -15,7 +15,7 @@
         "enable":true
     },
     "influxdb":{
-        "host":"10.0.0.17",
+        "host":"10.0.0.12",
         "port":8086,
         "db":"meshNodes",
         "logfile":"/home/pi/share/influx_client.log",
