@@ -19,6 +19,7 @@
         "port":8086,
         "db":"meshNodes",
         "logfile":"/home/pi/share/influx_client.log",
+        "mqtt_client_id":"py_influx",
         "enable":false
     }
 }

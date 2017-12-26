@@ -79,7 +79,7 @@ clientDB = InfluxDBClient(    config["influxdb"]["host"],
 #print("Query Result: {0}".format(result))
 
 # -------------------- Mqtt Client -------------------- 
-cid = config["mqtt"]["client_id"] +"_"+socket.gethostname()
+cid = config["influxdb"]["mqtt_client_id"] +"_"+socket.gethostname()
 clientMQTT = mqtt.Client(client_id=cid)
 clientMQTT.on_connect = on_connect
 clientMQTT.on_message = on_message
