@@ -1,14 +1,17 @@
 import paho.mqtt.client as mqtt
 from influxdb import InfluxDBClient
+import influxdb
 import requests
 import datetime
 import logging as log
 import cfg
+from time import sleep
+import socket
 
 # -------------------- mqtt events -------------------- 
 def on_connect(lclient, userdata, flags, rc):
     log.info("mqtt connected with result code "+str(rc))
-    lclient.subscribe("#")
+    lclient.subscribe("Nodes/#")
 
 def on_message(client, userdata, msg):
     topic_parts = msg.topic.split('/')
@@ -29,13 +32,24 @@ def on_message(client, userdata, msg):
             ]
         try:
             clientDB.write_points(post)
+            log.debug(msg.topic+" "+str(msg.payload)+" posted")
         except requests.exceptions.ConnectionError:
-            log.error("ConnectionError sample skipped"+msg.topic)
-        log.debug(msg.topic+" "+str(msg.payload)+" posted")
+            log.error("ConnectionError sample skipped "+msg.topic)
+        except influxdb.exceptions.InfluxDBServerError:
+            log.error("InfluxDBServerError sample skipped "+msg.topic)
     except ValueError:
         log.error(" ValueError with : "+msg.topic+" "+str(msg.payload))
 
-
+def mqtt_connect_retries():
+    connected = False
+    while(not connected):
+        try:
+            clientMQTT.connect(config["mqtt"]["host"], config["mqtt"]["port"], config["mqtt"]["keepalive"])
+            connected = True
+        except socket.error:
+            log.error("socket.error will try a reconnection in 10 s")
+        sleep(10)
+    return
 
 config = cfg.get_local_json("config.json")
 
@@ -47,7 +61,7 @@ log.basicConfig(    filename=config["influxdb"]["logfile"],
                     )
 log.getLogger('').addHandler(log.StreamHandler())
 
-log.info("influx client started @ :"+str(datetime.datetime.utcnow()))
+log.info("influx client started")
 
 
 # -------------------- influxDB client -------------------- 
@@ -65,9 +79,11 @@ clientDB = InfluxDBClient(    config["influxdb"]["host"],
 #print("Query Result: {0}".format(result))
 
 # -------------------- Mqtt Client -------------------- 
-clientMQTT = mqtt.Client()
+cid = config["mqtt"]["client_id"] +"_"+socket.gethostname()
+clientMQTT = mqtt.Client(client_id=cid)
 clientMQTT.on_connect = on_connect
 clientMQTT.on_message = on_message
 
-clientMQTT.connect(config["mqtt"]["host"], config["mqtt"]["port"], 3600)
+mqtt_connect_retries()
+
 clientMQTT.loop_forever()
